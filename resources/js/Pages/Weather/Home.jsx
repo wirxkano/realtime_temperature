@@ -1,15 +1,21 @@
 import { Link } from '@inertiajs/react';
 import Header from '@/Layouts/Header';
+import { useEffect, useState } from 'react';
+import { formatTime, capitalizeFirstLetter, isEmpty } from '@/Utilities/function';
+import Loading from '@/Components/Loading';
+import axios from "axios";
 
 function Home() {
+  const [locationInfor, setLocationInfor] = useState({});
+
   let weatherInfors = [
     {
       name: 'Độ ẩm',
-      value: '80%'
+      value: locationInfor?.main?.humidity + '%'
     },
     {
       name: 'Nhiệt độ',
-      value: '32° C'
+      value: Math.round(locationInfor?.main?.temp) + '° C'
     },
     {
       name: 'Lịch sử nhiệt độ',
@@ -17,11 +23,11 @@ function Home() {
         <div>
           <div className='py-2'>
             <i className="fa-solid fa-arrow-up text-red-300 pr-2 font-bold"></i>
-            <span>32° C</span>
+            <span>{Math.round(locationInfor?.main?.temp_max) + '° C'}</span>
           </div>
           <div>
             <i className="fa-solid fa-arrow-down text-cyan-300 pr-2 font-bold"></i>
-            <span>25° C</span>
+            <span>{Math.round(locationInfor?.main?.temp_min) + '° C'}</span>
           </div>
         </div>
     },
@@ -29,7 +35,7 @@ function Home() {
       name: 'Thống kê',
       value:
         <div>
-          <i className="fa-solid fa-chart-line"></i>
+          <i className="fa-solid fa-chart-line text-4xl py-2"></i>
         </div>
     }
   ]
@@ -42,20 +48,32 @@ function Home() {
   let hours = dateObj.getHours();
   let minutes = dateObj.getMinutes();
   let status = 'Ban ngày';
-  const weatherStatus = ['Có nắng', 'Nắng nhẹ', 'Ít mây', 'Nắng nhẹ', 'Nhiều mây', 'Có mây', 'Nhiều mây'];
 
   if (hours >= 18 || hours <= 5) {
     status = 'Ban đêm';
   }
 
-  function formatTime(day, hours, minutes) {
-    const days = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+  useEffect(() => {
+    async function getLocation() {
+      axios.get('/weather')
+        .then(response => {
+          setLocationInfor(response.data);
+          console.log("🚀 ~ getLocation ~ response.data:", response.data)
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
 
-    const period = hours >= 12 ? 'PM' : 'AM';
+    getLocation();
+  }, [])
 
-    const formattedMinutes = minutes.toString().padStart(2, '0');
-
-    return `${days[day]}, ${hours}:${formattedMinutes} ${period}`;
+  if (isEmpty(locationInfor)) {
+    return (
+      <div className='flex items-center justify-center'>
+        <Loading type='spin' color='#83dcf7' />
+      </div>
+    )
   }
 
   return (
@@ -63,23 +81,27 @@ function Home() {
       <div className='grid grid-cols-2 gap-4'>
         <div className='bg-white rounded-2xl flex items-center justify-center'>
           <div className='bg-weather-img bg-cover w-full h-full rounded-2xl shadow-lg shadow-cyan-300/50'>
-            <div className='w-44 h-44 mr-auto ml-auto'>
-              <img src={`https://www.accuweather.com/images/weathericons/${day}.svg`} alt="Weather Icon" />
+            <div >
+              <img 
+                className='mr-auto ml-auto w-44 h-44'
+                src={`https://openweathermap.org/img/wn/${locationInfor.weather[0].icon}@2x.png`} 
+                alt="Weather Icon" 
+              />
             </div>
 
             <div className='text-center text-white text-xl'>
-              <p className='font-bold text-4xl '>{weatherInfors[1].value}</p>
-              <p className='text-xl p-4'>{weatherStatus[day]}</p>
+              <p className='font-bold text-4xl '>{Math.round(locationInfor.main.temp)}° C</p>
+              <p className='text-xl p-4'>{capitalizeFirstLetter(locationInfor.weather[0].description)}</p>
 
               <div className='border-b-2 w-40 mr-auto ml-auto'></div>
 
               <div className='p-4'>
-                <p>{date + ' Tháng ' + month + ' ' + year}</p>
-                <p>{formatTime(day, hours, minutes)}</p>
+                <p className='pb-2'>{date + ' Tháng ' + month + ' ' + year}</p>
+                <p className='pb-2'>{formatTime(day, hours, minutes)}</p>
                 <p>{status}</p>
               </div>
 
-              <p className='text-xl p-4'>Thành phố Hồ Chí Minh, Việt Nam</p>
+              <p className='text-xl p-4'>{locationInfor.name}, {locationInfor.sys.country}</p>
             </div>
           </div>
 
@@ -95,7 +117,7 @@ function Home() {
                 href={weatherInfor.name === 'Thống kê' ? '/statistic' : '#'}
               >
                 <div className='w-full h-full p-10'>
-                  <p className='text-lg text-slate-200'>{weatherInfor.name}</p>
+                  <p className='text-xl text-slate-200'>{weatherInfor.name}</p>
                   <div className='text-3xl'>{weatherInfor.value}</div>
                 </div>
               </Link>
