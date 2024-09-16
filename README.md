@@ -1,8 +1,8 @@
-### Install packages:
-## npm install
+## Install packages:
+`npm install`
 
-### How to run
+## How to run
 Run vite:
-## npm run dev
+`npm run dev` 
 Run laravel:
-## php artisan serve
+`php artisan serve`
