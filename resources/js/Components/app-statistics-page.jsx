@@ -1,8 +1,5 @@
 'use client'
 
-import Header from '@/Layouts/Header';
-import React from 'react';
-
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts'
@@ -50,7 +47,7 @@ function StatCard({ title, icon, unit, stats }) {
   )
 }
 
-function Statistic() {
+export function PageJsx() {
   const [data, setData] = useState([])
 
   useEffect(() => {
@@ -144,14 +141,3 @@ function Statistic() {
     </div>
   )
 }
-
-export default Statistic;
-// function Statistic() {
-//   return (
-//     <Header title="Nhiệt độ và độ ẩm trong tuần">
-      
-//     </Header>
-//   );
-// }
-
-// export default Statistic;
