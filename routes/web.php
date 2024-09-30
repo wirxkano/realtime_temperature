@@ -17,7 +17,7 @@ Route::get('/statistic', function () {
 Route::get('/weather', function () {
     $lat = 10.848160;
     $long = 106.772522;
-    $apiKey = env('API_KEY_WEATHER');
+    $apiKey = '816f698aa8247668420fa9b43dfd7871';
     $response = Http::get("https://api.openweathermap.org/data/2.5/weather?lat={$lat}&lon={$long}&units=metric&APPID={$apiKey}&lang=vi");
 
     return $response->json();

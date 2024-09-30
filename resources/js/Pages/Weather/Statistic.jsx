@@ -64,94 +64,87 @@ function Statistic() {
   const lightStats = calculateStats(data, 'lightLevel')
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Sensor Statistics</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard title="Temperature" icon={<Thermometer className="h-4 w-4" />} unit="°C" stats={tempStats} />
-        <StatCard title="Humidity" icon={<Droplets className="h-4 w-4" />} unit="%" stats={humidityStats} />
-        <StatCard title="Air Quality Index" icon={<Wind className="h-4 w-4" />} unit="" stats={aqiStats} />
-        <StatCard title="Light Level" icon={<Sun className="h-4 w-4" />} unit="lux" stats={lightStats} />
+    <Header title="Nhiệt độ và độ ẩm trong tuần">
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Thống kê cảm biến</h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <StatCard title="Temperature" icon={<Thermometer className="h-4 w-4" />} unit="°C" stats={tempStats} />
+          <StatCard title="Humidity" icon={<Droplets className="h-4 w-4" />} unit="%" stats={humidityStats} />
+          <StatCard title="Air Quality Index" icon={<Wind className="h-4 w-4" />} unit="" stats={aqiStats} />
+          <StatCard title="Light Level" icon={<Sun className="h-4 w-4" />} unit="lux" stats={lightStats} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Xu hướng nhiệt độ và độ ẩm trong 24 giờ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="time" />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip />
+                    <Legend />
+                    <Line yAxisId="left" type="monotone" dataKey="temperature" stroke="#8884d8" name="Temperature (°C)" />
+                    <Line yAxisId="right" type="monotone" dataKey="humidity" stroke="#82ca9d" name="Humidity (%)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Xu hướng AQI và cường độ ánh sáng trong 24 giờ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="time" />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip />
+                    <Legend />
+                    <Line yAxisId="left" type="monotone" dataKey="aqi" stroke="#ffc658" name="AQI" />
+                    <Line yAxisId="right" type="monotone" dataKey="lightLevel" stroke="#ff7300" name="Light Level (lux)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>So sánh trung bình theo giờ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="time" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="temperature" fill="#8884d8" name="Temperature (°C)" />
+                    <Bar dataKey="humidity" fill="#82ca9d" name="Humidity (%)" />
+                    <Bar dataKey="aqi" fill="#ffc658" name="AQI" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>24-Hour Temperature and Humidity Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Legend />
-                  <Line yAxisId="left" type="monotone" dataKey="temperature" stroke="#8884d8" name="Temperature (°C)" />
-                  <Line yAxisId="right" type="monotone" dataKey="humidity" stroke="#82ca9d" name="Humidity (%)" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>24-Hour AQI and Light Level Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Legend />
-                  <Line yAxisId="left" type="monotone" dataKey="aqi" stroke="#ffc658" name="AQI" />
-                  <Line yAxisId="right" type="monotone" dataKey="lightLevel" stroke="#ff7300" name="Light Level (lux)" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Hourly Average Comparison</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="temperature" fill="#8884d8" name="Temperature (°C)" />
-                  <Bar dataKey="humidity" fill="#82ca9d" name="Humidity (%)" />
-                  <Bar dataKey="aqi" fill="#ffc658" name="AQI" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    </Header>
   )
 }
 
 export default Statistic;
-// function Statistic() {
-//   return (
-//     <Header title="Nhiệt độ và độ ẩm trong tuần">
-      
-//     </Header>
-//   );
-// }
-
-// export default Statistic;
