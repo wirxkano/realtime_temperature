@@ -18,7 +18,7 @@ export default {
                 sans: ['Inter var', ...defaultTheme.fontFamily.sans],
             },
             backgroundImage: {
-                'weather-img': 'url(/public/myImg/sky.jpg)'
+                'weather-img': 'url(/public/myImg/background.png)'
             }
         },
     },

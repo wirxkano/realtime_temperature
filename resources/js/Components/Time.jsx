@@ -15,11 +15,6 @@ const Time = () => {
   const updateTime = () => {
     const dateObj = new Date();
     const hours = dateObj.getHours();
-    let status = 'Ban ngày';
-
-    if (hours >= 18 || hours <= 5) {
-      status = 'Ban đêm';
-    }
 
     setTime({
       date: dateObj.getDate(),
@@ -28,7 +23,7 @@ const Time = () => {
       day: dateObj.getDay(),
       hours: hours,
       minutes: dateObj.getMinutes(),
-      status: status,
+      status: (new Date().getHours() >=18 || new Date().getHours() <= 5)? 'Ban đêm' : 'Ban ngày',
     });
   };
 

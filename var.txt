@@ -1,0 +1,2 @@
+sql db name = 'if0_37501957_realtime_temperature'
+sql host name = 'sql310.infinityfree.com'
