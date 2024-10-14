@@ -8,32 +8,36 @@ import axios from "axios";
 
 function Home() {
   const [locationInfor, setLocationInfor] = useState({});
-
-  let weatherInfors = [
+  const [weatherInfors, setWeatherInfors] = useState([
     {
       name: 'Độ ẩm',
-      value: locationInfor?.main?.humidity + '%',
-      icon: <i className="fa-solid fa-droplet"></i>
+      value: '80' + '%',
+      icon: <i className="fa-solid fa-droplet text-blue-300"></i>
     },
     {
       name: 'Nhiệt độ',
-      value: Math.round(locationInfor?.main?.temp) + '° C',
-      icon: <i className="fa-solid fa-temperature-three-quarters"></i>
+      value: '33' + '° C',
+      icon: <i className="fa-solid fa-temperature-three-quarters text-red-400"></i>
     },
+    // {
+    //   name: 'Lịch sử nhiệt độ',
+    //   value:
+    //     <div>
+    //       <div className='py-2'>
+    //         <i className="fa-solid fa-arrow-up text-red-300 pr-2 font-bold"></i>
+    //         <span>{Math.round(locationInfor?.main?.temp_max) + '° C'}</span>
+    //       </div>
+    //       <div>
+    //         <i className="fa-solid fa-arrow-down text-cyan-300 pr-2 font-bold"></i>
+    //         <span>{Math.round(locationInfor?.main?.temp_min) + '° C'}</span>
+    //       </div>
+    //     </div>,
+    //   icon: ''
+    // },
     {
-      name: 'Lịch sử nhiệt độ',
-      value:
-        <div>
-          <div className='py-2'>
-            <i className="fa-solid fa-arrow-up text-red-300 pr-2 font-bold"></i>
-            <span>{Math.round(locationInfor?.main?.temp_max) + '° C'}</span>
-          </div>
-          <div>
-            <i className="fa-solid fa-arrow-down text-cyan-300 pr-2 font-bold"></i>
-            <span>{Math.round(locationInfor?.main?.temp_min) + '° C'}</span>
-          </div>
-        </div>,
-      icon: ''
+      name: 'Phun sương',
+      value: <i className="fa-solid fa-hand-holding-droplet"></i>,
+      icon: <i className="fa-solid fa-sliders text-orange-400"></i>
     },
     {
       name: 'Thống kê',
@@ -41,15 +45,23 @@ function Home() {
         <div>
           <i className="fa-solid fa-chart-line text-4xl py-2"></i>
         </div>,
-      icon: <i className="fa-solid fa-chart-simple"></i>
+      icon: <i className="fa-solid fa-chart-simple text-amber-600"></i>
     }
-  ]
+  ]);
+
+  let weatherIcons = {
+    sunny: 'myImg/sunny.svg',
+    clouds: 'myImg/clouds.svg',
+    rain: 'myImg/north.svg'
+  };
+
+  const [weatherIcon, setWeatherIcon] = useState(weatherIcons.sunny);
 
   useEffect(() => {
     async function getLocation() {
       axios.get('/weather')
         .then(response => {
-          setLocationInfor(response.data);
+          setLocationInfor(response.data)
         })
         .catch(error => {
           console.error(error);
@@ -59,9 +71,66 @@ function Home() {
     getLocation();
   }, [])
 
+  useEffect(() => {
+    async function getDataFromPy() {
+      axios.post('/api/gettemperature')
+        .then(response => {
+          const { temperature, humidity } = response.data;
+          console.log(response.data);
+          
+          setWeatherInfors([
+            {
+              name: 'Độ ẩm',
+              value: humidity + '%',
+              icon: <i className="fa-solid fa-droplet text-blue-300"></i>
+            },
+            {
+              name: 'Nhiệt độ',
+              value: temperature + '° C',
+              icon: <i className="fa-solid fa-temperature-three-quarters text-red-400"></i>
+            },
+            {
+              name: 'Phun sương',
+              value: <i className="fa-solid fa-hand-holding-droplet"></i>,
+              icon: <i className="fa-solid fa-sliders text-orange-400"></i>
+            },
+            {
+              name: 'Thống kê',
+              value: <div><i className="fa-solid fa-chart-line text-4xl py-2"></i></div>,
+              icon: <i className="fa-solid fa-chart-simple text-amber-600"></i>
+            }
+          ]);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    }
+  
+    getDataFromPy();
+  
+    const interval = setInterval(() => {
+      getDataFromPy();
+    }, 10000);
+  
+    return () => clearInterval(interval);
+  }, []);
+  
+
+  useEffect(() => {
+    if (!isEmpty(locationInfor)) {
+      if (locationInfor?.weather[0]?.id.toString().charAt(0) === '5') {
+        setWeatherIcon(weatherIcons.rain);
+      } else if (locationInfor?.weather[0]?.id.toString().charAt(0) === '8') {
+        setWeatherIcon(weatherIcons.clouds);
+      } else {
+        setWeatherIcon(weatherIcons.sunny);
+      }
+    }
+  }, [locationInfor]);
+
   if (isEmpty(locationInfor)) {
     return (
-      <div className='flex items-center justify-center min-h-full'>
+      <div className='flex items-center justify-center min-h-svh'>
         <Loading type='spin' color='#83dcf7' />
       </div>
     )
@@ -71,26 +140,27 @@ function Home() {
     <Header title='Thời tiết hôm nay'>
       <div className='grid grid-cols-2 gap-4'>
         <div className='bg-white rounded-2xl flex items-center justify-center'>
-          <div className='bg-weather-img bg-cover w-full h-full rounded-2xl shadow-lg shadow-cyan-300/50'>
+          <div className='bg-weather-img bg-cover w-full h-full rounded-2xl shadow-lg shadow-slate-400'>
             <div >
               <img
                 className='mr-auto ml-auto w-44 h-44'
-                src={`https://openweathermap.org/img/wn/${locationInfor.weather[0].icon}@2x.png`}
+                // src={`https://openweathermap.org/img/wn/${locationInfor.weather[0].icon}@2x.png`}
+                src={weatherIcon}
                 alt="Weather Icon"
               />
             </div>
 
-            <div className='text-center text-white text-xl'>
+            <div className='text-center text-gray-700 text-xl'>
               <p className='font-bold text-4xl '>{Math.round(locationInfor.main.temp)}° C</p>
               <p className='text-xl p-4'>{capitalizeFirstLetter(locationInfor.weather[0].description)}</p>
 
-              <div className='border-b-2 w-40 mr-auto ml-auto'></div>
+              <div className='border-b-2 w-40 mr-auto ml-auto border-gray-700'></div>
 
               <div className='p-4'>
                 <Time />
               </div>
 
-              <p className='text-xl p-4'>{locationInfor.name}, {locationInfor.sys.country}</p>
+              <p className='text-xl p-4 text-gray-800'>{locationInfor.name}, {locationInfor.sys.country}</p>
             </div>
           </div>
 
@@ -100,24 +170,24 @@ function Home() {
           {weatherInfors.map((weatherInfor, index) => (
             <div
               key={index}
-              className='bg-sky-400 rounded-2xl text-white shadow-lg shadow-sky-500/40 hover:bg-sky-500 cursor-pointer'
+              className='bg-gray-100 border-2 border-gray-200 rounded-2xl shadow-sm shadow-gray-400 hover:bg-gray-200 cursor-pointer'
             >
               {weatherInfor.name === 'Thống kê' ? (
                 <Link
                   href='/statistic'
                 >
-                  <div className='w-full h-full p-10'>
-                    <span className='text-xl text-slate-200'>{weatherInfor.name}</span>
-                    <span className='ml-2 text-slate-200'>{weatherInfor.icon}</span>
-                    <div className='text-3xl'>{weatherInfor.value}</div>
+                  <div className='w-full h-full p-10 text-gray-600'>
+                    <span className='text-2xl'>{weatherInfor.name}</span>
+                    <span className='ml-2'>{weatherInfor.icon}</span>
+                    <div className='text-3xl text-gray-700 mt-2'>{weatherInfor.value}</div>
                   </div>
                 </Link>
               ) : (
                 <div>
-                  <div className='w-full h-full p-10'>
-                    <span className='text-xl text-slate-200'>{weatherInfor.name}</span>
-                    <span className='ml-2 text-slate-200'>{weatherInfor.icon}</span>
-                    <div className='text-3xl'>{weatherInfor.value}</div>
+                  <div className='w-full h-full p-10 text-gray-600'>
+                    <span className='text-2xl'>{weatherInfor.name}</span>
+                    <span className='ml-2'>{weatherInfor.icon}</span>
+                    <div className='text-3xl text-gray-700 mt-2'>{weatherInfor.value}</div>
                   </div>
                 </div>
               )}
