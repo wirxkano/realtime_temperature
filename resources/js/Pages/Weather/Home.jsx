@@ -8,46 +8,8 @@ import axios from "axios";
 
 function Home() {
   const [locationInfor, setLocationInfor] = useState({});
-  const [weatherInfors, setWeatherInfors] = useState([
-    {
-      name: 'Độ ẩm',
-      value: '80' + '%',
-      icon: <i className="fa-solid fa-droplet text-blue-300"></i>
-    },
-    {
-      name: 'Nhiệt độ',
-      value: '33' + '° C',
-      icon: <i className="fa-solid fa-temperature-three-quarters text-red-400"></i>
-    },
-    // {
-    //   name: 'Lịch sử nhiệt độ',
-    //   value:
-    //     <div>
-    //       <div className='py-2'>
-    //         <i className="fa-solid fa-arrow-up text-red-300 pr-2 font-bold"></i>
-    //         <span>{Math.round(locationInfor?.main?.temp_max) + '° C'}</span>
-    //       </div>
-    //       <div>
-    //         <i className="fa-solid fa-arrow-down text-cyan-300 pr-2 font-bold"></i>
-    //         <span>{Math.round(locationInfor?.main?.temp_min) + '° C'}</span>
-    //       </div>
-    //     </div>,
-    //   icon: ''
-    // },
-    {
-      name: 'Phun sương',
-      value: <i className="fa-solid fa-hand-holding-droplet"></i>,
-      icon: <i className="fa-solid fa-sliders text-orange-400"></i>
-    },
-    {
-      name: 'Thống kê',
-      value:
-        <div>
-          <i className="fa-solid fa-chart-line text-4xl py-2"></i>
-        </div>,
-      icon: <i className="fa-solid fa-chart-simple text-amber-600"></i>
-    }
-  ]);
+  const [weatherInfors, setWeatherInfors] = useState([]);
+  const [temp, setTemp] = useState(null);
 
   let weatherIcons = {
     sunny: 'myImg/sunny.svg',
@@ -59,7 +21,7 @@ function Home() {
 
   useEffect(() => {
     async function getLocation() {
-      axios.get('/weather')
+      axios.get('/api/weather')
         .then(response => {
           setLocationInfor(response.data)
         })
@@ -72,27 +34,24 @@ function Home() {
   }, [])
 
   useEffect(() => {
-    async function getDataFromPy() {
-      axios.post('/api/gettemperature')
+    async function getWeatherInfors() {
+      axios.get('/api/sensor')
         .then(response => {
-          const { temperature, humidity } = response.data;
-          console.log(response.data);
-          
           setWeatherInfors([
             {
               name: 'Độ ẩm',
-              value: humidity + '%',
+              value: Math.round(response.data.humidity) + '%',
               icon: <i className="fa-solid fa-droplet text-blue-300"></i>
             },
             {
               name: 'Nhiệt độ',
-              value: temperature + '° C',
+              value: Math.round(response.data.temperature) + '° C',
               icon: <i className="fa-solid fa-temperature-three-quarters text-red-400"></i>
             },
             {
-              name: 'Phun sương',
-              value: <i className="fa-solid fa-hand-holding-droplet"></i>,
-              icon: <i className="fa-solid fa-sliders text-orange-400"></i>
+              name: 'Ánh sáng',
+              value: Math.round(response.data.light_level) + ' lux',
+              icon: <i className="fa-regular fa-sun text-amber-400"></i>
             },
             {
               name: 'Thống kê',
@@ -100,21 +59,18 @@ function Home() {
               icon: <i className="fa-solid fa-chart-simple text-amber-600"></i>
             }
           ]);
+          setTemp(response.data.temperature);
         })
         .catch(error => {
-          console.error('Error fetching data:', error);
+          console.error(error);
         });
     }
-  
-    getDataFromPy();
-  
-    const interval = setInterval(() => {
-      getDataFromPy();
-    }, 10000);
-  
+
+    getWeatherInfors();
+
+    const interval = setInterval(getWeatherInfors, 600000);
     return () => clearInterval(interval);
   }, []);
-  
 
   useEffect(() => {
     if (!isEmpty(locationInfor)) {
@@ -151,7 +107,7 @@ function Home() {
             </div>
 
             <div className='text-center text-gray-700 text-xl'>
-              <p className='font-bold text-4xl '>{Math.round(locationInfor.main.temp)}° C</p>
+              <p className='font-bold text-4xl '>{Math.round(temp)}° C</p>
               <p className='text-xl p-4'>{capitalizeFirstLetter(locationInfor.weather[0].description)}</p>
 
               <div className='border-b-2 w-40 mr-auto ml-auto border-gray-700'></div>

@@ -9,7 +9,7 @@ const Time = () => {
     day: new Date().getDay(),
     hours: new Date().getHours(),
     minutes: new Date().getMinutes(),
-    status: 'Ban ngày',
+    status: (new Date().getHours() >=18 || new Date().getHours() <= 5)? 'Ban đêm' : 'Ban ngày',
   });
 
   const updateTime = () => {

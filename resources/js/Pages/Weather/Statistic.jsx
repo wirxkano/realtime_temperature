@@ -50,21 +50,21 @@ function StatCard({ title, icon, unit, stats }) {
   )
 }
 
-function Statistic() {
+function Statistic({ sensor_data }) {
   const [data, setData] = useState([])
 
   useEffect(() => {
     // In a real application, you would fetch data from an API here
-    setData(generateData())
+    setData(sensor_data)
   }, [])
 
   const tempStats = calculateStats(data, 'temperature')
   const humidityStats = calculateStats(data, 'humidity')
   const aqiStats = calculateStats(data, 'aqi')
-  const lightStats = calculateStats(data, 'lightLevel')
+  const lightStats = calculateStats(data, 'light_level')
 
   return (
-    <Header title="Nhiệt độ và độ ẩm trong tuần">
+    <Header title="Nhiệt độ và độ ẩm trong ngày">
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Thống kê cảm biến</h1>
 
@@ -113,7 +113,7 @@ function Statistic() {
                     <Tooltip />
                     <Legend />
                     <Line yAxisId="left" type="monotone" dataKey="aqi" stroke="#ffc658" name="AQI" />
-                    <Line yAxisId="right" type="monotone" dataKey="lightLevel" stroke="#ff7300" name="Light Level (lux)" />
+                    <Line yAxisId="right" type="monotone" dataKey="light_level" stroke="#ff7300" name="Light Level (lux)" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
