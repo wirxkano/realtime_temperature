@@ -4,6 +4,7 @@ use App\Events\SensorUpdated;
 use App\Http\Controllers\Home;
 use App\Http\Controllers\Statistic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -24,27 +25,15 @@ Route::get('/api/weather', function () {
     return $response->json();
 });
 
-Route::get('/api/sensor', function () {
-    $data = DB::table('sensors')->select('temperature', 'humidity', 'light_level')->latest('created_at')->first();
+Route::get('/api/get-sensor', function () {
+    // $data = DB::table('sensors')->select('temperature', 'humidity', 'light_level')->latest('created_at')->first();
+    
+    $data = Cache::get('sensor_data', [
+        'temperature' => null,
+        'humidity' => null,
+        'light_level' => rand(200, 800)
+    ]);
+
 
     return $data;
-});
-
-Route::post('/api/sensor', function (Request $request) {
-    $temperature = $request->input('temperature');
-    $humidity = $request->input('humidity');
-
-    $validatedData = $request->validate([
-        'temperature' => 'required|numeric',
-        'humidity' => 'required|numeric',
-    ]);
-
-    DB::table('sensors')->insert([
-        'temperature' => $validatedData['temperature'],
-        'humidity' => $validatedData['humidity'],
-        'aqi' => rand(40, 83),
-        'light_level' => rand(200, 800),
-    ]);
-
-    return response()->json(['success' => true, 'temperature' => $temperature, 'humidity' => $humidity]);
 });

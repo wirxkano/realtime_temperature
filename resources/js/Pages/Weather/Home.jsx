@@ -21,68 +21,57 @@ function Home() {
 
   useEffect(() => {
     async function getLocation() {
-      axios.get('/api/weather')
-        .then(response => {
-          setLocationInfor(response.data)
-        })
-        .catch(error => {
-          console.error(error);
-        });
+      try {
+        const response = await axios.get('/api/weather');
+        setLocationInfor(response.data);
+      } catch (error) {
+        console.error("Error fetching location information:", error);
+      }
     }
 
     getLocation();
-  }, [])
-
-  useEffect(() => {
-    async function getWeatherInfors() {
-      axios.get('/api/sensor')
-        .then(response => {
-          setWeatherInfors([
-            {
-              name: 'Độ ẩm',
-              value: Math.round(response.data.humidity) + '%',
-              icon: <i className="fa-solid fa-droplet text-blue-300"></i>
-            },
-            {
-              name: 'Nhiệt độ',
-              value: Math.round(response.data.temperature) + '° C',
-              icon: <i className="fa-solid fa-temperature-three-quarters text-red-400"></i>
-            },
-            {
-              name: 'Ánh sáng',
-              value: Math.round(response.data.light_level) + ' lux',
-              icon: <i className="fa-regular fa-sun text-amber-400"></i>
-            },
-            {
-              name: 'Thống kê',
-              value: <div><i className="fa-solid fa-chart-line text-4xl py-2"></i></div>,
-              icon: <i className="fa-solid fa-chart-simple text-amber-600"></i>
-            }
-          ]);
-          setTemp(response.data.temperature);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    }
-
-    getWeatherInfors();
-
-    const interval = setInterval(getWeatherInfors, 600000);
-    return () => clearInterval(interval);
   }, []);
 
+  // Fetch weather information and set up polling
   useEffect(() => {
-    if (!isEmpty(locationInfor)) {
-      if (locationInfor?.weather[0]?.id.toString().charAt(0) === '5') {
-        setWeatherIcon(weatherIcons.rain);
-      } else if (locationInfor?.weather[0]?.id.toString().charAt(0) === '8') {
-        setWeatherIcon(weatherIcons.clouds);
-      } else {
-        setWeatherIcon(weatherIcons.sunny);
+    async function getWeatherInfors() {
+      try {
+        const response = await axios.get('/api/get-sensor');
+        setWeatherInfors([
+          {
+            name: 'Độ ẩm',
+            value: Math.round(response.data.humidity) + '%',
+            icon: <i className="fa-solid fa-droplet text-blue-300"></i>
+          },
+          {
+            name: 'Nhiệt độ',
+            value: Math.round(response.data.temperature) + '° C',
+            icon: <i className="fa-solid fa-temperature-three-quarters text-red-400"></i>
+          },
+          {
+            name: 'Ánh sáng',
+            value: Math.round(response.data.light_level) + ' lux',
+            icon: <i className="fa-regular fa-sun text-amber-400"></i>
+          },
+          {
+            name: 'Thống kê',
+            value: <div><i className="fa-solid fa-chart-line text-4xl py-2"></i></div>,
+            icon: <i className="fa-solid fa-chart-simple text-amber-600"></i>
+          }
+        ]);
+        setTemp(response.data.temperature);
+      } catch (error) {
+        console.error("Error fetching weather information:", error);
       }
     }
-  }, [locationInfor]);
+
+    // Initial fetch and set up interval
+    getWeatherInfors();
+    const interval = setInterval(getWeatherInfors, 60000);
+
+    // Cleanup function to clear interval
+    return () => clearInterval(interval);
+  }, []);
 
   if (isEmpty(locationInfor)) {
     return (
